@@ -197,7 +197,6 @@ function hero(){
     DATA.inning.forEach(d=>{const c=el('circle',{cx:X(d.inn),cy:Y(d[key]),r:4.5,fill:cv('--surface'),stroke:color,'stroke-width':2.5});c.style.cursor='pointer';c.addEventListener('mousemove',e=>showTip(e,`Inn ${d.inn} · ${key==='ov'?'success':'moot'} <b>${d[key]}%</b>`));c.addEventListener('mouseleave',hideTip);svg.append(c);});
     const l=DATA.inning[DATA.inning.length-1];
     svg.append(Object.assign(el('text',{x:X(l.inn)+14,y:Y(l[key])+5,fill:color,class:'dlab mono'}),{textContent:l[key]+'%'}));
-    svg.append(Object.assign(el('text',{x:X(l.inn)+14,y:Y(l[key])+22,fill:cv('--muted'),style:'font-size:11px;font-family:var(--font-mono)'}),{textContent:key==='ov'?'success':'moot'}));
   };
   line('ov',cv('--blue'));line('mo',cv('--red'));
   document.getElementById('hero').append(svg);
