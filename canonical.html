@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The ABS Challenge System Runs Out of Challenges Before It Runs Out of Bad Calls</title>
+<meta name="description" content="A pitch-by-pitch look at MLB's 2026 ABS challenge system: it does its worst work in exactly the moments that matter most — and the public data everyone uses to grade it is quietly incomplete.">
+<style>
+  :root{
+    --plane:#f7f8fa; --surface:#ffffff; --ink:#0c0e12; --ink2:#42474f; --muted:#8b8f98;
+    --grid:#e7e9ed; --baseline:#c7cbd2; --border:rgba(12,14,18,.10);
+    --blue:#2a78d6; --red:#e34948;
+    --font-sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --font-mono:ui-monospace,"SF Mono","Cascadia Code",Consolas,"Liberation Mono",monospace;
+    --read:680px; --wide:1080px;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{--plane:#0c0d10;--surface:#16181c;--ink:#f2f3f5;--ink2:#c2c6cf;--muted:#8b8f98;
+      --grid:#26282e;--baseline:#3a3d44;--border:rgba(255,255,255,.10);--blue:#3987e5;--red:#e66767;}
+  }
+  :root[data-theme="light"]{--plane:#f7f8fa;--surface:#fff;--ink:#0c0e12;--ink2:#42474f;--muted:#8b8f98;--grid:#e7e9ed;--baseline:#c7cbd2;--border:rgba(12,14,18,.10);--blue:#2a78d6;--red:#e34948;}
+  :root[data-theme="dark"]{--plane:#0c0d10;--surface:#16181c;--ink:#f2f3f5;--ink2:#c2c6cf;--muted:#8b8f98;--grid:#26282e;--baseline:#3a3d44;--border:rgba(255,255,255,.10);--blue:#3987e5;--red:#e66767;}
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--plane);color:var(--ink);font-family:var(--font-sans);
+    font-size:18px;line-height:1.68;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:var(--wide);margin:0 auto;padding:clamp(30px,5vw,76px) clamp(18px,4vw,40px)}
+  .col{max-width:var(--read);margin-inline:auto}
+  .eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--blue);font-weight:600;margin:0 0 16px}
+  h1{font-size:clamp(32px,5.6vw,56px);line-height:1.02;letter-spacing:-.022em;font-weight:840;text-wrap:balance;margin:0 0 20px}
+  .standfirst{font-size:clamp(18px,2.4vw,22px);line-height:1.5;color:var(--ink2);font-weight:420;margin:0 0 26px}
+  .prov{font-family:var(--font-mono);font-size:12px;color:var(--muted);letter-spacing:.02em;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:14px 0;display:flex;flex-wrap:wrap;gap:6px 18px;margin:0 0 8px}
+  .prose{margin-inline:auto}
+  .prose p{margin:0 0 22px}
+  .prose h2{font-size:clamp(23px,3.4vw,31px);line-height:1.12;letter-spacing:-.015em;font-weight:780;text-wrap:balance;margin:48px 0 16px}
+  .prose b{font-weight:680;color:var(--ink)}
+  .prose em{font-style:italic}
+  .lead::first-letter{font-size:3.1em;float:left;line-height:.82;font-weight:820;padding:6px 10px 0 0;color:var(--ink)}
+  .pull{font-size:clamp(20px,3vw,26px);line-height:1.32;font-weight:720;letter-spacing:-.01em;color:var(--ink);
+    border-left:3px solid var(--red);padding:2px 0 2px 20px;margin:34px 0;text-wrap:balance}
+  figure{margin:38px 0}
+  .figwide{max-width:var(--read);margin-inline:auto}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:clamp(16px,2.5vw,26px)}
+  .kicker{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+  .figtitle{font-size:clamp(18px,2.4vw,22px);font-weight:720;letter-spacing:-.01em;margin:0 0 14px;text-wrap:balance}
+  .legend{display:flex;gap:20px;flex-wrap:wrap;margin:0 0 14px;font-size:13.5px;font-weight:560}
+  .lg{display:inline-flex;align-items:center;gap:8px;color:var(--ink2)}
+  .sw{width:22px;height:3px;border-radius:2px;display:inline-block}
+  figcaption{font-family:var(--font-mono);font-size:12px;color:var(--muted);margin-top:12px;line-height:1.5}
+  svg{display:block;width:100%;height:auto;overflow:visible;font-family:var(--font-sans)}
+  .ax{fill:var(--muted);font-size:12px;font-family:var(--font-mono)}
+  .axlab{fill:var(--muted);font-size:11px;font-family:var(--font-mono);letter-spacing:.05em;text-transform:uppercase}
+  .dlab{font-weight:740;font-size:15px}.dlab.mono{font-family:var(--font-mono)}
+  .cellv{font-family:var(--font-mono);font-weight:600;font-size:13px}
+  .stats{display:grid;grid-template-columns:1fr;gap:18px;margin-bottom:22px}
+  @media(min-width:600px){.stats{grid-template-columns:repeat(3,1fr)}}
+  .stat{border-left:2px solid var(--border);padding-left:15px}
+  .big{display:block;font-size:clamp(38px,6vw,50px);font-weight:830;letter-spacing:-.025em;line-height:1;font-variant-numeric:tabular-nums}
+  .statlab{display:block;font-weight:640;font-size:14px;margin-top:7px}
+  .statsub{display:block;font-size:12px;color:var(--muted);font-family:var(--font-mono);margin-top:2px}
+  .heatwrap{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .foot{max-width:var(--read);margin:56px auto 0;border-top:1px solid var(--border);padding-top:22px;font-size:14.5px;color:var(--ink2);line-height:1.6}
+  .foot h3{font-family:var(--font-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 12px;font-weight:600}
+  .caveat{border-left:3px solid var(--blue);padding:2px 0 2px 16px;margin:16px 0}
+  a{color:var(--blue)}
+  .tip{position:fixed;pointer-events:none;opacity:0;transform:translate(-50%,-115%);background:var(--ink);color:var(--surface);font-family:var(--font-mono);font-size:12px;padding:6px 9px;border-radius:7px;white-space:nowrap;z-index:9;transition:opacity .08s;font-weight:600}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="col">
+    <p class="eyebrow">MLB · Automated Ball-Strike Challenge System · 2026 First Half</p>
+    <h1>The ABS challenge system runs out of challenges before it runs out of bad calls</h1>
+    <p class="standfirst">MLB's robot-umpire challenge system was sold as a fix for the calls that matter most. A pitch-by-pitch look at the entire first half shows it does its worst work in exactly those moments — and that the data everyone is using to grade it is quietly incomplete.</p>
+    <div class="prov"><span>6,053 challenges</span><span>212,221 called pitches</span><span>Mar 25 – Jul 12, 2026</span><span>source · MLB StatsAPI (Hawk-Eye)</span></div>
+  </header>
+
+  <div class="prose col">
+    <p class="lead">Baseball spent 150 years arguing about balls and strikes. In 2026 it started settling those arguments in seconds, on the video board, with a camera. Tap your helmet, and Hawk-Eye tells 40,000 people whether the umpire was right.</p>
+    <p>The system is popular, it's fast, and — this is the part worth sitting with — it mostly proves the umpires are <em>good</em>. Across 212,221 called pitches in the first half, big-league umpires got the call right <b>92.6%</b> of the time. That's the honest headline nobody clicks on.</p>
+    <p>Here's the one they should.</p>
+    <h2>The ninth-inning double-whammy</h2>
+    <p>I pulled every ABS challenge of the first half — 6,053 of them — from MLB's public game feeds and tracked two things by inning: how often a challenge <em>succeeded</em>, and how often a clearly-blown call went unchallenged because the team had <b>no challenges left to spend.</b> Both curves bend the wrong way, at the same time, in the same inning.</p>
+  </div>
+
+  <figure class="figwide">
+    <div class="card">
+      <p class="kicker">The headline</p>
+      <h3 class="figtitle">Challenge success falls as uncorrectable calls rise — converging in the ninth</h3>
+      <div class="legend">
+        <span class="lg"><span class="sw" style="background:var(--blue)"></span>Challenge success rate (calls corrected)</span>
+        <span class="lg"><span class="sw" style="background:var(--red)"></span>“Moot” rate (clear miss, no challenge left)</span>
+      </div>
+      <div id="hero"></div>
+      <figcaption>Innings 1–9, regulation. Extras excluded: teams get a bonus challenge each extra inning, which resets availability.</figcaption>
+    </div>
+  </figure>
+
+  <div class="prose col">
+    <p>In the first three innings, challenges succeed ~59% of the time and almost no blown call goes uncorrectable. By the <b>ninth</b>, challenge success has fallen to <b>40%</b> — and <b>more than a third (36%) of obvious missed calls can't be challenged at all</b>, because the challenging team is tapped out.</p>
+    <p class="pull">A system built to correct the calls that matter most is least able to correct them in the moments that matter most.</p>
+    <p>The obvious objection is that the ninth is full of blowouts where nobody's trying. It isn't the explanation. Split by score: in <b>tie-or-one-run</b> ninth innings — the ones that decide games — challenges still succeed only ~47%, and the availability collapse is <em>identical</em> to blowouts (~26% of clear misses uncorrectable either way). The moot rate doesn't care whether the game is close; nine innings simply drains the bank. That failure is structural, not situational.</p>
+    <p>And it doesn't stay in the regular season. The challenge system is used in October. A team that has spent both challenges has no recourse on a blown call in a win-or-go-home ninth — the exact situation the system was sold to fix.</p>
+
+    <h2>First, why you should believe any of this</h2>
+    <p>Before the rest of the findings, the part that makes them trustworthy — and the part that turned out to be a genuine surprise. <b>MLB's own public feed is hiding about a quarter of all challenges.</b> When you pull challenges from the StatsAPI game feed the way any analyst naturally would — off the pitch record — you silently miss every challenge that <em>ends</em> an at-bat (a created or confirmed third strike, a fourth ball). Those live in a different, play-level field.</p>
+    <p>Skip them and you drop <b>~25% of all challenges</b>, every one of them terminal, and report an inflated overturn rate (~55%) instead of the true one (<b>53.0%</b>). Recovering those hidden challenges is what makes this dataset complete — and the proof it's right is that the corrected total reconciles to <b>Baseball Savant's official count within 1%</b> (6,053 vs 6,040), role splits nearly identical, pitcher count exact. If your challenge numbers don't match Savant's, this is probably why.</p>
+    <p>The strike zone itself is <em>reconstructed</em> from pitch coordinates and calibrated against actual ABS verdicts — it agrees ~87% of the time on borderline pitches, near the ceiling given tracking noise. That's precise enough to trust the <b>shapes and rankings</b> here; treat any single percentage within about an inch of the edge as an estimate. And it cross-validates: the league overturn rate matches Savant, the accuracy figure matches Umpire Scorecards, and the umpires who grade worst here are the ones the challenge data independently flags. Two unrelated methods, same answer.</p>
+
+    <h2>Why it fails late: everyone panics at the edge of their nightmare</h2>
+    <p>The late-game collapse isn't the pitches getting harder. On matched pitch difficulty, late challenges are on <em>the same</em> borderline pitches as early ones — they just succeed less. It's the humans. And the pattern is beautifully specific: <b>each role falls apart as it approaches the outcome it fears.</b></p>
+  </div>
+
+  <figure class="col">
+    <div class="card">
+      <p class="kicker">Decision quality</p>
+      <h3 class="figtitle">Each role cracks under its own pressure</h3>
+      <div id="desp"></div>
+      <figcaption>Batters get worse as strikes mount; catchers as balls mount — each toward the terminal outcome it fears.</figcaption>
+    </div>
+  </figure>
+
+  <div class="prose col">
+    <p>Pitch difficulty can't produce a mirror like that, because the pitch doesn't know who's challenging or which way the count is running. The symmetry is the tell: this is emotion, not optics. Nowhere is it more human than the hitter's last strike.</p>
+    <h2>Hitters are terrible at challenging strike three</h2>
+  </div>
+
+  <figure class="figwide">
+    <div class="card">
+      <p class="kicker">The human hook · desperation</p>
+      <div class="stats">
+        <div class="stat"><span class="big" style="color:var(--red)">38.5%</span><span class="statlab">success challenging strike three</span><span class="statsub">wrong 61.5% of the time</span></div>
+        <div class="stat"><span class="big">572</span><span class="statlab">rung up on their own challenge</span><span class="statsub">the strikeout, self-confirmed</span></div>
+        <div class="stat"><span class="big">33%</span><span class="statlab">of all batter challenges</span><span class="statsub">a third — not a fringe case</span></div>
+      </div>
+      <div id="s3bars"></div>
+      <figcaption>Not a difficulty artifact: on matched pitches 1–2″ off the edge, strike-three challenges still hit just 27% vs 42% on earlier counts. Desperation, not difficulty.</figcaption>
+    </div>
+  </figure>
+
+  <div class="prose col">
+    <p>A third of all hitter challenges come on a called third strike — and they're wrong 61% of the time. Down to their last strike, hitters throw a Hail Mary at a pitch that was usually a clear strike, lose, and get rung up anyway. <b>572 times this half, a hitter challenged his own strikeout, lost, and had it confirmed to the whole ballpark on the video board.</b> Same pitches, worse decisions. It is the purest desperation in the dataset, and it is very, very human.</p>
+
+    <h2>What it costs: the calls that get away</h2>
+    <p>Because I computed the ABS verdict on <em>every</em> taken pitch, not just the challenged ones, I can count the calls the system left on the table: clear umpire misses — at least an inch and a half past any measurement noise — that went unchallenged. There were about <b>2,000 with a challenge still available</b>, roughly 1.7 per game a team simply didn't catch. The best teams convert only about half of the catchable misses in their favor; the worst, under a quarter.</p>
+    <p>And then the cruelest bucket: the clear blown call in a spot where the team had <b>no challenge left</b> — not a strategic pass, a structural dead end. A hitter rung up on a pitch inches off the plate in the ninth, empty challenge bank, nothing anyone can do. That's not a team failure. That's the system reaching its limit exactly where the stakes are highest.</p>
+
+    <h2>The umpires are fine. The mechanism isn't.</h2>
+    <p>None of this is an umpire story. Grade every taken pitch against the ABS zone and the accuracy curve is reassuring: a coin flip right at the edge, near-perfect a couple of inches out, <b>92.6%</b> overall.</p>
+  </div>
+
+  <figure class="figwide">
+    <div class="card">
+      <p class="kicker">The calibration check · why the zone can be trusted</p>
+      <h3 class="figtitle">The harder the pitch, the more forgiving the math</h3>
+      <div id="diff"></div>
+      <figcaption>Share of calls the umpire got right, by distance of the pitch from the zone edge. Aggregate only — individual umpires are not ranked.</figcaption>
+    </div>
+  </figure>
+
+  <div class="prose col">
+    <p>The finding isn't that umpires are bad. It's that the challenge system, layered on top of good umpires, has a hole shaped exactly like the moments it was built for. As MLB weighs whether to move from challenges to a full automated zone, that's the sharpest empirical input available:</p>
+    <p class="pull">The safety net develops its biggest holes where the fall is longest — including October. The challenge system runs out of challenges before it runs out of bad calls.</p>
+  </div>
+
+  <div class="foot">
+    <h3>Method &amp; provenance</h3>
+    <p>All 6,053 first-half ABS challenges and 212,221 called pitches were reconstructed from MLB StatsAPI (Hawk-Eye) game feeds, March 25 – July 12, 2026, and reconciled to Baseball Savant's official challenge total within 1%. The ABS strike zone is reconstructed and calibrated to actual verdicts (~87% agreement on borderline pitches). Findings are robust in rankings and shape; absolute percentages within ~1″ of the zone edge are estimates. Full method and reproducible code: <a href="#">[repository link]</a>.</p>
+    <p class="caveat"><b>On individual umpires:</b> this analysis deliberately does not rank them. A reconstructed zone is precise enough to grade the league in aggregate — the check that validates everything above — but not to fairly separate one umpire from another at a half-season sample. Individual accuracy is <a href="https://umpscorecards.com">Umpire Scorecards</a>' domain, not this one.</p>
+  </div>
+</div>
+<div class="tip" id="tip"></div>
+
+<script>
+const DATA={
+ inning:[{inn:1,ov:59.6,mo:0.0},{inn:2,ov:59.6,mo:1.6},{inn:3,ov:56.3,mo:4.3},{inn:4,ov:55.8,mo:2.8},{inn:5,ov:58.2,mo:4.1},{inn:6,ov:51.9,mo:14.2},{inn:7,ov:56.3,mo:15.3},{inn:8,ov:46.7,mo:24.8},{inn:9,ov:40.3,mo:36.4}],
+ bat:[{k:0,v:57.6},{k:1,v:46.6},{k:2,v:38.5}],
+ cat:[{k:0,v:63.0},{k:1,v:57.7},{k:2,v:58.4},{k:3,v:44.9}],
+ diff:[[.12,53.9],[.38,58.5],[.62,64.9],[.88,71.8],[1.12,76.5],[1.38,80.2],[1.62,85.3],[1.88,88.4],[2.12,91.0],[2.38,92.9],[2.62,95.2],[2.88,96.1],[3.12,97.4],[3.38,97.9],[3.62,98.4],[3.88,99.0],[4.5,99.9]]
+};
+const NS="http://www.w3.org/2000/svg";
+const el=(n,a={})=>{const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);return e;};
+const cv=s=>getComputedStyle(document.documentElement).getPropertyValue(s).trim();
+const tip=document.getElementById('tip');
+const showTip=(e,h)=>{tip.innerHTML=h;tip.style.left=e.clientX+'px';tip.style.top=e.clientY+'px';tip.style.opacity=1;};
+const hideTip=()=>tip.style.opacity=0;
+function hero(){
+  const W=1000,H=440,m={t:24,r:118,b:48,l:52},iw=W-m.l-m.r,ih=H-m.t-m.b;
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':'Challenge success falls and moot rate rises across innings 1 to 9'});
+  const X=i=>m.l+(i-1)/8*iw,Y=v=>m.t+(70-v)/70*ih;
+  for(let g=0;g<=70;g+=10){const y=Y(g);svg.append(el('line',{x1:m.l,y1:y,x2:m.l+iw,y2:y,stroke:cv('--grid')}));svg.append(Object.assign(el('text',{x:m.l-10,y:y+4,'text-anchor':'end',class:'ax'}),{textContent:g+'%'}));}
+  DATA.inning.forEach(d=>svg.append(Object.assign(el('text',{x:X(d.inn),y:H-m.b+22,'text-anchor':'middle',class:'ax'}),{textContent:d.inn})));
+  svg.append(Object.assign(el('text',{x:m.l+iw/2,y:H-6,'text-anchor':'middle',class:'axlab'}),{textContent:'Inning'}));
+  const line=(key,color)=>{
+    svg.append(el('path',{d:DATA.inning.map((d,i)=>(i?'L':'M')+X(d.inn)+' '+Y(d[key])).join(' '),fill:'none',stroke:color,'stroke-width':3,'stroke-linejoin':'round','stroke-linecap':'round'}));
+    DATA.inning.forEach(d=>{const c=el('circle',{cx:X(d.inn),cy:Y(d[key]),r:4.5,fill:cv('--surface'),stroke:color,'stroke-width':2.5});c.style.cursor='pointer';c.addEventListener('mousemove',e=>showTip(e,`Inn ${d.inn} · ${key==='ov'?'success':'moot'} <b>${d[key]}%</b>`));c.addEventListener('mouseleave',hideTip);svg.append(c);});
+    const l=DATA.inning[DATA.inning.length-1];
+    svg.append(Object.assign(el('text',{x:X(l.inn)+14,y:Y(l[key])+5,fill:color,class:'dlab mono'}),{textContent:l[key]+'%'}));
+    svg.append(Object.assign(el('text',{x:X(l.inn)+14,y:Y(l[key])+22,fill:cv('--muted'),style:'font-size:11px;font-family:var(--font-mono)'}),{textContent:key==='ov'?'success':'moot'}));
+  };
+  line('ov',cv('--blue'));line('mo',cv('--red'));
+  document.getElementById('hero').append(svg);
+}
+function desp(){
+  const W=680,H=250,m={t:22,r:16,b:40,l:40},iw=W-m.l-m.r,ih=H-m.t-m.b;
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':'Batter success falls with strikes; catcher success falls with balls'});
+  const Y=v=>m.t+(70-v)/40*ih;
+  [40,50,60,70].forEach(g=>{const y=Y(g);svg.append(el('line',{x1:m.l,y1:y,x2:m.l+iw,y2:y,stroke:cv('--grid')}));svg.append(Object.assign(el('text',{x:m.l-8,y:y+4,'text-anchor':'end',class:'ax'}),{textContent:g+'%'}));});
+  const draw=(arr,color,label,maxk,up)=>{const X=k=>m.l+k/maxk*iw;
+    svg.append(el('path',{d:arr.map((p,i)=>(i?'L':'M')+X(p.k)+' '+Y(p.v)).join(' '),fill:'none',stroke:color,'stroke-width':2.6,'stroke-linejoin':'round','stroke-linecap':'round'}));
+    arr.forEach(p=>{const c=el('circle',{cx:X(p.k),cy:Y(p.v),r:4,fill:cv('--surface'),stroke:color,'stroke-width':2.4});c.style.cursor='pointer';c.addEventListener('mousemove',e=>showTip(e,`${label} · <b>${p.v}%</b>`));c.addEventListener('mouseleave',hideTip);svg.append(c);});
+    const l=arr[arr.length-1];svg.append(Object.assign(el('text',{x:X(l.k)-2,y:Y(l.v)+(up?-12:20),'text-anchor':'end',fill:color,class:'dlab'}),{textContent:label}));};
+  draw(DATA.bat,cv('--red'),'Batters · vs strikes',2,false);
+  draw(DATA.cat,cv('--blue'),'Catchers · vs balls',3,true);
+  svg.append(Object.assign(el('text',{x:m.l+iw/2,y:H-6,'text-anchor':'middle',class:'axlab'}),{textContent:'0 → terminal count (2 strikes / 3 balls)'}));
+  document.getElementById('desp').append(svg);
+}
+function s3bars(){
+  const rows=[{l:'Batter · strike three',v:38.5,c:cv('--red')},{l:'Batter · earlier counts',v:52.2,c:cv('--blue')},{l:'Catcher · any count',v:58.4,c:cv('--blue')}];
+  const W=1000,rowH=56,m={t:10,r:64,l:210,b:26},iw=W-m.l-m.r,H=m.t+rows.length*rowH+m.b,X=v=>v/70*iw;
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':'Batter strike-three success far below earlier counts and catchers'});
+  [0,20,40,60].forEach(g=>{const x=m.l+X(g);svg.append(el('line',{x1:x,y1:m.t,x2:x,y2:m.t+rows.length*rowH,stroke:cv('--grid')}));svg.append(Object.assign(el('text',{x,y:H-8,'text-anchor':'middle',class:'ax'}),{textContent:g+'%'}));});
+  rows.forEach((r,i)=>{const y=m.t+i*rowH+rowH/2;
+    svg.append(Object.assign(el('text',{x:m.l-16,y:y+5,'text-anchor':'end',fill:cv('--ink2'),style:'font-size:14px;font-weight:600'}),{textContent:r.l}));
+    svg.append(el('rect',{x:m.l,y:y-12,width:iw,height:24,rx:4,fill:cv('--grid'),opacity:.55}));
+    const bar=el('rect',{x:m.l,y:y-12,width:X(r.v),height:24,rx:4,fill:r.c});bar.style.cursor='pointer';bar.addEventListener('mousemove',e=>showTip(e,`${r.l} · <b>${r.v}%</b>`));bar.addEventListener('mouseleave',hideTip);svg.append(bar);
+    svg.append(Object.assign(el('text',{x:m.l+X(r.v)+12,y:y+5,fill:r.c,class:'dlab mono'}),{textContent:r.v+'%'}));});
+  document.getElementById('s3bars').append(svg);
+}
+function diff(){
+  const W=1000,H=300,m={t:20,r:24,b:44,l:48},iw=W-m.l-m.r,ih=H-m.t-m.b,maxx=4.6;
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':'Umpire accuracy rises with distance from the zone edge'});
+  const X=d=>m.l+d/maxx*iw,Y=v=>m.t+(100-v)/55*ih;
+  [50,60,70,80,90,100].forEach(g=>{const y=Y(g);svg.append(el('line',{x1:m.l,y1:y,x2:m.l+iw,y2:y,stroke:cv('--grid')}));svg.append(Object.assign(el('text',{x:m.l-8,y:y+4,'text-anchor':'end',class:'ax'}),{textContent:g+'%'}));});
+  [0,1,2,3,4].forEach(d=>svg.append(Object.assign(el('text',{x:X(d),y:H-m.b+22,'text-anchor':'middle',class:'ax'}),{textContent:d+'″'})));
+  svg.append(Object.assign(el('text',{x:m.l+iw/2,y:H-6,'text-anchor':'middle',class:'axlab'}),{textContent:'Distance of pitch from zone edge'}));
+  svg.append(el('path',{d:`M ${X(DATA.diff[0][0])} ${Y(45)} `+DATA.diff.map(p=>'L'+X(p[0])+' '+Y(p[1])).join(' ')+` L ${X(DATA.diff[DATA.diff.length-1][0])} ${Y(45)} Z`,fill:cv('--blue'),opacity:.10}));
+  svg.append(el('path',{d:DATA.diff.map((p,i)=>(i?'L':'M')+X(p[0])+' '+Y(p[1])).join(' '),fill:'none',stroke:cv('--blue'),'stroke-width':3,'stroke-linejoin':'round'}));
+  DATA.diff.forEach(p=>{const c=el('circle',{cx:X(p[0]),cy:Y(p[1]),r:3.4,fill:cv('--blue')});c.style.cursor='pointer';c.addEventListener('mousemove',e=>showTip(e,`${p[0].toFixed(2)}″ off · <b>${p[1]}%</b> correct`));c.addEventListener('mouseleave',hideTip);svg.append(c);});
+  svg.append(Object.assign(el('text',{x:X(.12)+8,y:Y(53.9)-8,fill:cv('--red'),class:'dlab mono'}),{textContent:'54%'}));
+  svg.append(Object.assign(el('text',{x:X(4.5)-6,y:Y(99.9)-8,'text-anchor':'end',fill:cv('--blue'),class:'dlab mono'}),{textContent:'99.9%'}));
+  document.getElementById('diff').append(svg);
+}
+hero();desp();s3bars();diff();
+</script>
+</body>
+</html>

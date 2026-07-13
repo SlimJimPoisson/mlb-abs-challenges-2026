@@ -1,0 +1,4 @@
+feeds/
+__pycache__/
+*.pyc
+chase_probe.csv
