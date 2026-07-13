@@ -1,7 +1,7 @@
 # MLB ABS Challenge System — 2026 First-Half Analysis
 
 Reproducible data and code behind **"The ABS Challenge System Runs Out of Challenges Before It Runs Out of Bad Calls."**
-Full writeup with interactive charts: **[CANONICAL_URL]**
+Full writeup with interactive charts: **[abs.realimagination.top](https://abs.realimagination.top/)**
 
 Every 2026 first-half ABS challenge (6,053) and every taken pitch (212,221) reconstructed from MLB's public StatsAPI game feeds (Hawk-Eye), **March 25 – July 12, 2026**.
 
